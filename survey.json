@@ -1,0 +1,18 @@
+{
+  "questions": [
+    {
+      "body": "What's your name?",
+      "kind": "text"
+    },
+    {
+      "body": "What's your email?",
+      "kind": "text"
+    },
+    {
+      "body": "Event 1",
+      "kind": "yes-no"
+    }
+
+  ],
+  "title": "Sunrise Text-in"
+}
