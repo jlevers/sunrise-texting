@@ -18,8 +18,8 @@ def sms_question(question):
 
     twiml_response.message(question.body)
     instructions = SMS_INSTRUCTIONS[question.kind]
-    # Can't have a TwiML <Message /> with no body attribute, which would occur with Question.TEXT's
-    # instruction
+    # It's invalid to have a TwiML <Message /> with no body attribute, so we need to check that
+    # the instructions for the current kind of question are not None before sending them as an SMS
     instructions and twiml_response.message(SMS_INSTRUCTIONS[question.kind])
 
     return twiml_response
