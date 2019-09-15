@@ -10,6 +10,7 @@ django = "*"
 twilio = "*"
 psycopg2 = "*"
 django-environ = "*"
+pytest = "*"
 
 [requires]
 python_version = "3.7"
