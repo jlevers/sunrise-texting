@@ -1,0 +1,5 @@
+[run]
+omit=
+      sunrise/settings/*
+      textin/tests/*
+      sunrise/wsgi.py

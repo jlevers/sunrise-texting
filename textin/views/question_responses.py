@@ -4,18 +4,21 @@ from django.views.decorators.http import require_POST, require_GET
 from twilio.twiml.messaging_response import MessagingResponse
 
 from textin.models import Question, QuestionResponse
+from textin.util import compose_response
 
 @require_POST
 def save_response(request, survey_id, question_id):
     question = Question.objects.get(id=question_id)
 
-    save_response_from_request(request, question)
-
-    next_question = question.next()
-    if not next_question:
-        return goodbye(request)
+    if save_response_from_request(request, question):
+        next_question = question.next()
+        if not next_question:
+            return goodbye(request)
+        else:
+            return next_question_redirect(next_question.id, survey_id)
     else:
-        return next_question_redirect(next_question.id, survey_id)
+        already_answered_message = "You've already answered that question."
+        return HttpResponse(compose_response([already_answered_message]))
 
 
 def next_question_redirect(question_id, survey_id):
@@ -29,10 +32,7 @@ def next_question_redirect(question_id, survey_id):
 
 def goodbye(request):
     goodbye_message = 'That was the last question. Thank you for taking this survey!'
-    response = MessagingResponse()
-    response.message(goodbye_message)
-
-    return HttpResponse(response)
+    return HttpResponse(compose_response([goodbye_message]))
 
 
 def save_response_from_request(request, question):
@@ -46,9 +46,9 @@ def save_response_from_request(request, question):
     if not response:
         QuestionResponse(message_sid=session_id, phone_number=phone_number, response=request_body,
                          question=question).save()
-    else:
-        response.response = request_body
-        response.save()
+        return true
+
+    return false  # If they've already answered this question
 
 
 def _extract_request_body(request, question_kind):

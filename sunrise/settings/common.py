@@ -10,11 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
-import environ
 import os
-
-env = environ.Env()
-environ.Env.read_env()
+from .env import env
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -27,12 +24,6 @@ SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG')
-
-ALLOWED_HOSTS = [
-    '*.ngrok.io',
-    'localhost',
-]
-
 
 # Application definition
 

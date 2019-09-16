@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.test import TestCase
 import pytest
 
-from textin.models import Survey, Question, QuestionReponse
+from textin.models import Survey, Question, QuestionResponse
 
 class StoreQuestionResponseText(TestCase):
 
@@ -30,15 +30,16 @@ class StoreQuestionResponseText(TestCase):
         }
 
         self.client.post(question_store_url, request_parameters)
-        new_response = QuestionReponse.objects.get(question_id=self.question_id)
+        new_response = QuestionResponse.objects.get(question_id=self.question.id)
 
-        assert new_response.call_sid = 'somerandomuniqueid'
-        assert new_response.phone_number = '324238944'
-        assert new_response.response = 'I agree with you'
+        assert new_response.message_sid == 'somerandomuniqueid'
+        assert new_response.phone_number == '324238944'
+        assert new_response.response == 'I agree with you'
 
     def test_store_response_and_redirect(self):
         self.create_question(Question.NUMERIC)
         question_two = Question(body='Question two', kind=Question.TEXT, survey=self.survey)
+        question_two.save()
         question_ids_two = {
             'survey_id': self.survey.id,
             'question_id': question_two.id

@@ -34,4 +34,4 @@ class ShowQuestionTest(TestCase):
         self.client.get(reverse('question', kwargs=self.question_ids),
                         sms_parameters)
 
-        assert self.client.session["answering_question_id"] = self.question.id
+        assert self.client.session["answering_question_id"] == self.question.id

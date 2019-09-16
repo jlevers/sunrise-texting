@@ -14,14 +14,7 @@ def show_question(request, survey_id, question_id):
 
 
 def sms_question(question):
-    twiml_response = MessagingResponse()
-
-    twiml_response.message(question.body)
-    instructions = SMS_INSTRUCTIONS[question.kind]
-    # It's invalid to have a TwiML <Message /> with no body attribute, so we need to check that
-    # the instructions for the current kind of question are not None before sending them as an SMS
-    instructions and twiml_response.message(SMS_INSTRUCTIONS[question.kind])
-
+    twiml_response = compose_response([question.body, SMS_INSTRUCTIONS[question.kind]])
     return twiml_response
 
 SMS_INSTRUCTIONS = {

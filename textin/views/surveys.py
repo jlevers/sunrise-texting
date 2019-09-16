@@ -1,11 +1,12 @@
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
 from twilio.twiml.messaging_response import MessagingResponse
 
 from textin.models import Survey, Question
+from textin.util import compose_response
 
 
 @require_GET
@@ -18,7 +19,7 @@ def show_survey_results(request, survey_id):
         'survey_title': survey.title
     }
 
-    return render_to_response('results.html', context=template_context)
+    return render(request, 'results.html', context=template_context)
 
 
 @require_POST
@@ -55,9 +56,8 @@ def show_survey(request, survey_id):
 
     first_question_url = reverse('question', kwargs=first_question_ids)
 
-    welcome = "Thanks for texting in to let us know you're here!"
-    twiml_response = MessagingResponse()
-    twiml_response.message(welcome)
+    welcome = "Thanks for texting in to let us know you're at the %s!" % survey.title
+    twiml_response = compose_response([welcome])
     twiml_response.redirect(first_question_url, method='GET')
 
     return HttpResponse(twiml_response, content_type='application/xml')

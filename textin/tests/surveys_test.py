@@ -23,7 +23,7 @@ class SurveyRedirectionTest(TestCase):
         session['answering_question_id'] = self.question.id
         session.save()
 
-        response = self.clinet.post(reverse('first_survey'))
+        response = self.client.post(reverse('first_survey'))
 
         expected_url = reverse('save_response',
                                kwargs={'survey_id': self.question.survey.id,
