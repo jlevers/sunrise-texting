@@ -53,7 +53,7 @@ def redirect_to_first_results(request):
 @csrf_exempt
 def choose_survey(request):
     surveys = Survey.objects.filter(start_date__lte=date.today(), end_date__gte=date.today())
-    surveys_enum = enumerate(surveys)
+    surveys_enum = enumerate(surveys, start=1)
 
     request.session['active_cookie'] = 'choose_survey'
 
@@ -67,7 +67,7 @@ def choose_survey(request):
             return redirect('survey', survey_id=first_survey.id)
 
         choose_message = "Please choose the event you're checking into, by responding with the number of that event:"
-        options_message = "\n".join(["%f: %s" % (index + 1, survey.title) for index, survey in surveys_enum])
+        options_message = "\n".join([f'{index}: {survey.title}' for index, survey in surveys_enum])
         return HttpResponse(compose_response(choose_message + "\n\n" + options_message))
 
     else:
@@ -75,16 +75,16 @@ def choose_survey(request):
         invalid_survey_message = ""
         try:
             survey_num = int(survey_num_response)
-            if survey_num < 1 or survey_num > len(surveys_enum):
-                invalid_survey_message = "%s does not correspond to one of the available events.\
-                                          Please respond with a valid event number:" % survey_num
+            if survey_num < 1 or survey_num > len(surveys):
+                invalid_survey_message = f'{survey_num} does not correspond to one of the available events.\
+                                          Please respond with a valid event number:'
         except ValueError:
-            invalid_survey_message = "%s is not a number. Please respond with a valid event number:" % survey_num_response
+            invalid_survey_message = f'{survey_num_response} is not a number. Please respond with a valid event number:'
 
         if len(invalid_survey_message):
             return HttpResponse(compose_response(invalid_survey_message))
 
-        del session['choose_survey']
+        del request.session['choose_survey']
 
         survey = surveys[survey_num - 1]
         return redirect('survey', survey_id=survey.id)

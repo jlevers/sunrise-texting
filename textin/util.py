@@ -10,7 +10,7 @@ class SurveyLoader():
 
     def load_survey(self):
         new_survey = Survey(title=self.survey['title'],
-                            end_message=self.survey['final_message'],
+                            end_message=self.survey['end_message'],
                             start_date=self.survey['start_date'],
                             end_date=self.survey['end_date'])
         new_survey.save()
