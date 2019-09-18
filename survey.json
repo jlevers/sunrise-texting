@@ -1,18 +1,15 @@
 {
   "questions": [
     {
-      "body": "What's your name?",
-      "kind": "text"
-    },
-    {
-      "body": "What's your email?",
-      "kind": "text"
-    },
-    {
       "body": "Would you be interested in attending Event 1?",
       "kind": "yes-no"
+    },
+    {
+      "body": "How about Event 2?",
+      "kind": "yes-no"
     }
-
   ],
-  "title": "Lewiston PA Climate Strike"
+  "title": "Lewiston PA Climate Strike",
+  "start_date": "2019-09-01",
+  "end_date": "2019-09-27"
 }

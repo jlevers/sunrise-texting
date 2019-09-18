@@ -1,12 +1,21 @@
+from datetime import date
 from django.db import models
 from django.core.exceptions import ValidationError
 
 class Survey(models.Model):
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, unique=True)
+    end_message = models.CharField(max_length=500,
+                                   default="That was the last question. Thank you for taking this survey!")
+    start_date = models.DateField(default=date.today)
+    end_date = models.DateField()
 
     @property
     def responses(self):
         return QuestionResponse.objects.filter(question__survey__id=self.id)
+
+    @property
+    def responder_count(self):
+        return len(Responder.objects.filter(surveys__responder_set__contains=self.id))
 
     @property
     def first_question(self):
@@ -29,7 +38,7 @@ class Question(models.Model):
 
     body = models.CharField(max_length=255)
     kind = models.CharField(max_length=255, choices=QUESTION_KIND_CHOICES)
-    survey = models.ForeignKey(Survey, on_delete='CASCADE')
+    survey = models.ForeignKey(Survey, on_delete=models.CASCADE)
 
     @classmethod
     def validate_kind(cls, kind):
@@ -45,11 +54,24 @@ class Question(models.Model):
         return '%s' % self.body
 
 
+class Responder(models.Model):
+    phone_number = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255, blank=True, null=True)
+    email = models.CharField(max_length=255, blank=True, null=True)
+    surveys = models.ManyToManyField(to=Survey)
+
+    def __str__(self):
+        stringified = "<%s" % self.phone_number
+        stringified = ("%s\nphone: " % self.name if self.name is not None else "") + stringified
+        stringified += ("\nemail: %s" % self.email if self.email is not None else "")
+        return stringified + ">"
+
+
 class QuestionResponse(models.Model):
     response = models.CharField(max_length=255)
     message_sid = models.CharField(max_length=255)
-    phone_number = models.CharField(max_length=255)
-    question = models.ForeignKey(Question, on_delete='CASCADE')
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    responder = models.ForeignKey(Responder, on_delete=models.CASCADE)
 
     def __str__(self):
         return '%s' % self.response
@@ -60,5 +82,17 @@ class QuestionResponse(models.Model):
             'kind': self.question.kind,
             'response': self.response,
             'message_sid': self.message_sid,
-            'phone_number': self.phone_number
         }
+
+    @classmethod
+    def valid_response(cls, kind, response):
+        if kind == Question.NUMERIC:
+            try:
+                int(response)
+            except ValueError:
+                return False
+        elif kind == Question.YES_NO:
+            first_letter = response[0].lower()
+            if first_letter != 'y' and first_letter != 'n':
+                return False
+        return True
