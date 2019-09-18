@@ -20,5 +20,5 @@ urlpatterns = [
          csrf_exempt(save_response),
          name='save_response'),
     path('responder/<int:responder_id>', csrf_exempt(process_responder), name='process_responder'),
-    path('responder/<int:responder_id>/<slug:attr>', set_responder_attr, name='set_responder_attr')
+    path('responder/<int:responder_id>/set-attr/', set_responder_attr, name='set_responder_attr')
 ]

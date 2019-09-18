@@ -26,16 +26,13 @@ def show_survey_results(request, survey_id):
 @require_POST
 def redirects_twilio_request_to_proper_endpoint(request):
     active_cookie = request.session.get('active_cookie')
-    print('ACTIVE: ', active_cookie)
     active_cookie_val = request.session.get(active_cookie)
+
     if not active_cookie or active_cookie == 'choose_survey':
         return redirect('choose_survey')
     elif active_cookie == 'responder_id':
-        print('RESPONDER')
         responder = Responder.objects.get(id=int(active_cookie_val))
-        attr = ('name' if responder.name is None else 'email')
-        print('ATTR: ', attr)
-        return redirect('set_responder_attr', responder_id=responder.id, attr=attr)
+        return redirect('set_responder_attr', responder_id=responder.id)
     elif active_cookie == 'answering_question_id':
         if not active_cookie_val:
             first_survey = Survey.objects.first()

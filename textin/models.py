@@ -55,6 +55,8 @@ class Question(models.Model):
 
 
 class Responder(models.Model):
+    USER_SET_ATTRS = ['name', 'email']
+    
     phone_number = models.CharField(max_length=255, unique=True)
     name = models.CharField(max_length=255, blank=True, null=True)
     email = models.CharField(max_length=255, blank=True, null=True)

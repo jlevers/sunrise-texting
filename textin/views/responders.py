@@ -19,29 +19,33 @@ To skip any of the following questions, please respond with SKIP.
     """
     twiml_response = compose_response(skip_howto_message)
 
-    responder_setup_url = reverse('set_responder_attr', kwargs={'responder_id': responder.id,
-                                                                'attr': 'name'})
+    request.session['responder_attr'] = Responder.USER_SET_ATTRS[0]
+    responder_setup_url = reverse('set_responder_attr', kwargs={'responder_id': responder.id})
     twiml_response.redirect(responder_setup_url, method='GET')
     return HttpResponse(twiml_response)
 
 
 @csrf_exempt
-def set_responder_attr(request, responder_id, attr):
+def set_responder_attr(request, responder_id):
     if request.method == 'GET':
+        attr = request.session['responder_attr']
         return HttpResponse(compose_response("What is your %s?" % attr))
     elif request.method == 'POST':
         responder = Responder.objects.get(id=responder_id)
-
+        attr = request.session['responder_attr']
         value = request.POST['Body']
+
         if value != 'SKIP':
-            setattr(responder, attr, value)
+            setattr(responder, request.session['responder_attr'], value)
             responder.save()
 
-        if attr == 'email':
+        if attr == Responder.USER_SET_ATTRS[-1]:
+            del request.session['responder_attr']
             return redirect('survey', survey_id=responder.surveys.all()[0].id)
         else:
-            next_attr_url = reverse('set_responder_attr', kwargs={'responder_id': responder.id,
-                                                                  'attr': 'email'})
+            next_attr = Responder.USER_SET_ATTRS[Responder.USER_SET_ATTRS.index(attr) + 1]
+            request.session['responder_attr'] = next_attr
+            next_attr_url = reverse('set_responder_attr', kwargs={'responder_id': responder.id})
             twiml_response = MessagingResponse()
             twiml_response.redirect(next_attr_url, method='GET')
 
