@@ -14,6 +14,8 @@ pytest = "*"
 pytest-cov = "*"
 pytest-django = "*"
 django-crispy-forms = "*"
+psycopg2-binary = "*"
+gunicorn = "*"
 
 [requires]
 python_version = "3.7"
