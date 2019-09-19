@@ -7,6 +7,7 @@ from django.views.decorators.http import require_POST, require_GET
 from twilio.twiml.messaging_response import MessagingResponse
 
 from textin.models import Question, Responder, Survey
+from textin.strings import SurveyStrings
 from textin.util import compose_response
 
 
@@ -60,15 +61,14 @@ def choose_survey(request):
     if not request.session.get('choose_survey'):
         request.session['choose_survey'] = True
         if not len(surveys):
-            no_surveys_msg = "There are no surveys available at this time. Sorry!"
-            return HttpResponse(compose_response(no_surveys_msg))
+
+            return HttpResponse(compose_response(SurveyStrings.no_surveys))
         elif len(surveys) == 1:
             first_survey = surveys.first()
             return redirect('survey', survey_id=first_survey.id)
 
-        choose_message = "Please choose the event you're checking into, by responding with the number of that event:"
-        options_message = "\n".join([f'{index}: {survey.title}' for index, survey in surveys_enum])
-        return HttpResponse(compose_response(choose_message + "\n\n" + options_message))
+        return HttpResponse(compose_response(
+            SurveyStrings.choose_survey + "\n\n" + SurveyStrings.survey_options(surveys)))
 
     else:
         survey_num_response = request.POST['Body']
@@ -76,10 +76,9 @@ def choose_survey(request):
         try:
             survey_num = int(survey_num_response)
             if survey_num < 1 or survey_num > len(surveys):
-                invalid_survey_message = f'{survey_num} does not correspond to one of the available events.\
-                                          Please respond with a valid event number:'
+                invalid_survey_message = SurveyStrings.invalid_survey_out_of_range(survey_num)
         except ValueError:
-            invalid_survey_message = f'{survey_num_response} is not a number. Please respond with a valid event number:'
+            invalid_survey_message = SurveyStrings.invalid_survey_nan(survey_num_response)
 
         if len(invalid_survey_message):
             return HttpResponse(compose_response(invalid_survey_message))
@@ -117,8 +116,7 @@ def show_survey(request, survey_id):
         twiml_response = MessagingResponse()
         twiml_response.redirect(new_responder_url, method='GET')
     else:
-        welcome = "Thanks for texting in to let us know you're at the %s!" % survey.title
-        twiml_response = compose_response(welcome)
+        twiml_response = compose_response(SurveyStrings.welcome(survey.title))
         twiml_response.redirect(first_question_url, method='GET')
         request.session['active_cookie'] = 'answering_question_id';
 

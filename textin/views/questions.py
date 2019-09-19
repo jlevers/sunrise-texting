@@ -3,6 +3,7 @@ from django.views.decorators.http import require_POST, require_GET
 from twilio.twiml.messaging_response import MessagingResponse
 
 from textin.models import Question
+from textin.strings import QuestionStrings
 from textin.util import compose_response
 
 @require_GET
@@ -15,11 +16,10 @@ def show_question(request, survey_id, question_id):
 
 
 def sms_question(question):
-    twiml_response = compose_response(question.body + ' ' + SMS_INSTRUCTIONS[question.kind])
-    return twiml_response
+    return compose_response(question.body + ' ' + SMS_INSTRUCTIONS[question.kind])
 
 SMS_INSTRUCTIONS = {
-    Question.TEXT: None,
-    Question.YES_NO: 'Please respond with "Yes" or "No"',
-    Question.NUMERIC: 'Please respond with a number'
+    Question.TEXT: QuestionStrings.TEXT,
+    Question.YES_NO: QuestionStrings.YES_NO,
+    Question.NUMERIC: QuestionStrings.NUMERIC
 }

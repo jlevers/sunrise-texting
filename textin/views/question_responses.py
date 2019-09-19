@@ -4,6 +4,7 @@ from django.views.decorators.http import require_POST, require_GET
 from twilio.twiml.messaging_response import MessagingResponse
 
 from textin.models import Question, QuestionResponse, Responder
+from textin.strings import QuestionResponseStrings
 from textin.util import compose_response
 
 @require_POST
@@ -16,8 +17,6 @@ def save_response(request, survey_id, question_id):
         # Process invalid answers
         valid = save_response_from_request(request, question)
         if not valid:
-            invalid_response_message = "Your response to a %s question was invalid. Please enter a \
-valid %s response:" % (question.kind, question.kind)
             twiml_response = compose_response(invalid_response_message)
             twiml_response.redirect(reverse('question', kwargs={'survey_id': question.survey.id,
                                                                 'question_id': question.id}))
@@ -29,8 +28,7 @@ valid %s response:" % (question.kind, question.kind)
         else:
             return next_question_redirect(next_question.id, survey_id)
     else:
-        already_answered_message = "You've already answered that question."
-        return HttpResponse(compose_response(already_answered_message))
+        return HttpResponse(compose_response(QuestionResponseStrings.already_answered))
 
 
 def next_question_redirect(question_id, survey_id):

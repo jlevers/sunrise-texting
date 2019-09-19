@@ -5,6 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from twilio.twiml.messaging_response import MessagingResponse
 
 from textin.models import Responder, Survey
+from textin.strings import ResponderStrings
 from textin.util import compose_response
 
 @csrf_exempt
@@ -13,11 +14,7 @@ def process_responder(request, responder_id):
     request.session['active_cookie'] = 'responder_id'
     request.session['responder_id'] = responder_id
 
-    skip_howto_message = """
-    We'd appreciate it if you'd tell us a little bit about yourself.
-To skip any of the following questions, please respond with SKIP.
-    """
-    twiml_response = compose_response(skip_howto_message)
+    twiml_response = compose_response(ResponderStrings.skip_instr)
 
     request.session['responder_attr'] = Responder.USER_SET_ATTRS[0]
     responder_setup_url = reverse('set_responder_attr', kwargs={'responder_id': responder.id})
