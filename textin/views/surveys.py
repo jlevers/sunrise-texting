@@ -77,14 +77,16 @@ def choose_survey(request):
     if not request.session.get('choose_survey'):
         request.session['choose_survey'] = True
         if not len(surveys):
-
             return HttpResponse(compose_response(SurveyStrings.no_surveys))
-        elif len(surveys) == 1:
+        elif len(surveys) == 1:  # If there's only one active survey
             first_survey = surveys.first()
-            return redirect('textin:survey', survey_id=first_survey.id)
-
-        return HttpResponse(compose_response(
-            SurveyStrings.choose_survey + "\n\n" + SurveyStrings.survey_options(surveys)))
+            twiml_response = compose_response(SurveyStrings.welcome(survey.title))
+            survey_params = {'survey_id': first_survey.id}
+            twiml_response.redirect(reverse('textin:survey', kwargs=survey_params), method='POST')
+            return HttpResponse(twiml_response)
+        else:  # If there are multiple active surveys
+            return HttpResponse(compose_response(
+                SurveyStrings.choose_survey + "\n\n" + SurveyStrings.survey_options(surveys)))
 
     else:
         survey_num_response = request.POST['Body']
@@ -102,7 +104,10 @@ def choose_survey(request):
         del request.session['choose_survey']
 
         survey = surveys[survey_num - 1]
-        return redirect('textin:survey', survey_id=survey.id)
+        twiml_response = compose_response(SurveyStrings.welcome(survey.title))
+        survey_params = {'survey_id': survey.id}
+        twiml_response.redirect(reverse('textin:survey', kwargs=survey_params), method='POST')
+        return HttpResponse(twiml_response)
 
 
 @csrf_exempt
@@ -132,9 +137,7 @@ def show_survey(request, survey_id):
         new_responder_url = reverse('textin:process_responder', kwargs=responder_params)
         twiml_response = MessagingResponse()
         twiml_response.redirect(new_responder_url, method='GET')
+        return HttpResponse(twiml_response, content_type='application/xml')
     else:
-        twiml_response = compose_response(SurveyStrings.welcome(survey.title))
-        twiml_response.redirect(first_question_url, method='GET')
         request.session['active_cookie'] = 'answering_question_id';
-
-    return HttpResponse(twiml_response, content_type='application/xml')
+        return redirect(first_question_url)

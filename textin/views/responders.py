@@ -17,7 +17,7 @@ def process_responder(request, responder_id):
     twiml_response = compose_response(ResponderStrings.skip_instr)
 
     request.session['responder_attr'] = Responder.USER_SET_ATTRS[0]
-    responder_setup_url = reverse('set_responder_attr', kwargs={'responder_id': responder.id})
+    responder_setup_url = reverse('textin:set_responder_attr', kwargs={'responder_id': responder.id})
     twiml_response.redirect(responder_setup_url, method='GET')
     return HttpResponse(twiml_response)
 
@@ -38,11 +38,11 @@ def set_responder_attr(request, responder_id):
 
         if attr == Responder.USER_SET_ATTRS[-1]:
             del request.session['responder_attr']
-            return redirect('survey', survey_id=responder.surveys.all()[0].id)
+            return redirect('textin:survey', survey_id=responder.surveys.all()[0].id)
         else:
             next_attr = Responder.USER_SET_ATTRS[Responder.USER_SET_ATTRS.index(attr) + 1]
             request.session['responder_attr'] = next_attr
-            next_attr_url = reverse('set_responder_attr', kwargs={'responder_id': responder.id})
+            next_attr_url = reverse('textin:set_responder_attr', kwargs={'responder_id': responder.id})
             twiml_response = MessagingResponse()
             twiml_response.redirect(next_attr_url, method='GET')
 

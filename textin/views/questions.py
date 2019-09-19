@@ -1,4 +1,5 @@
 from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
 from twilio.twiml.messaging_response import MessagingResponse
 
@@ -6,7 +7,7 @@ from textin.models import Question
 from textin.strings import QuestionStrings
 from textin.util import compose_response
 
-@require_GET
+@csrf_exempt
 def show_question(request, survey_id, question_id):
     question = Question.objects.get(id=question_id)
     twiml = sms_question(question)
