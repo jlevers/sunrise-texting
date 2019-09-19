@@ -80,7 +80,7 @@ def choose_survey(request):
             return HttpResponse(compose_response(SurveyStrings.no_surveys))
         elif len(surveys) == 1:  # If there's only one active survey
             first_survey = surveys.first()
-            twiml_response = compose_response(SurveyStrings.welcome(survey.title))
+            twiml_response = compose_response(SurveyStrings.welcome(first_survey.title))
             survey_params = {'survey_id': first_survey.id}
             twiml_response.redirect(reverse('textin:survey', kwargs=survey_params), method='POST')
             return HttpResponse(twiml_response)
