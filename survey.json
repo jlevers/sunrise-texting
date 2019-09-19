@@ -1,15 +1,12 @@
 {
   "questions": [
     {
-      "body": "Would you be interested in attending Event 1?",
-      "kind": "yes-no"
-    },
-    {
-      "body": "How about Event 2?",
+      "body": "Would you be interested in attending a Climate Strike follow-up meeting on Wed, 9/25, at 8pm in the LC Center Room?",
       "kind": "yes-no"
     }
   ],
   "title": "Lewisburg PA Climate Strike",
+  "end_message": "Thanks so much! Here's a link to a petition to move Bucknell off of fossil fuels and toward clean, renewable energy. Take a look and add your name! https://forms.gle/yJaqdQPidgAjexGG9",
   "start_date": "2019-09-01",
   "end_date": "2019-09-27"
 }

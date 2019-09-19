@@ -18,8 +18,8 @@ def save_response(request, survey_id, question_id):
         valid = save_response_from_request(request, question)
         if not valid:
             twiml_response = compose_response(invalid_response_message)
-            twiml_response.redirect(reverse('question', kwargs={'survey_id': question.survey.id,
-                                                                'question_id': question.id}))
+            question_params = {'survey_id': question.survey.id, 'question_id': question.id}
+            twiml_response.redirect(reverse('textin:question', question_params))
             return HttpResponse(twiml_response)
 
         next_question = question.next()
@@ -32,8 +32,8 @@ def save_response(request, survey_id, question_id):
 
 
 def next_question_redirect(question_id, survey_id):
-    parameters = {'survey_id': survey_id, 'question_id': question_id}
-    question_url = reverse('question', kwargs=parameters)
+    next_question_params = {'survey_id': survey_id, 'question_id': question_id}
+    question_url = reverse('textin:question', kwargs=next_question_params)
 
     twiml_response = MessagingResponse()
     twiml_response.redirect(url=question_url, method='GET')

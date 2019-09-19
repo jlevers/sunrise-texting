@@ -4,6 +4,8 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
+from django.views.generic.edit import UpdateView
+from django.views.generic.list import ListView
 from twilio.twiml.messaging_response import MessagingResponse
 
 from textin.models import Question, Responder, Survey
@@ -12,16 +14,36 @@ from textin.util import compose_response
 
 
 @require_GET
+def show_surveys(request):
+    surveys = Survey.objects.all().order_by('-start_date')
+    context = {'surveys': surveys}
+    return render(request, 'textin/surveys.html', context)
+
+
+class SurveyListView(ListView):
+    model = Survey
+    context_object_name = 'surveys'
+
+
+class SurveyUpdate(UpdateView):
+    model = Survey
+    fields = '__all__'
+    template_name_suffix = '_update_form'
+
+    def get_success_url(self):
+        return reverse('textin:survey_update', kwargs={'pk': self.object.id})
+
+
+@require_GET
 def show_survey_results(request, survey_id):
     survey = Survey.objects.get(id=survey_id)
     responses_to_render = [response.as_dict() for response in survey.responses]
 
-    template_context = {
+    context = {
         'responses': responses_to_render,
         'survey_title': survey.title
     }
-
-    return render(request, 'results.html', context=template_context)
+    return render(request, 'polls/results.html', context)
 
 
 @require_POST
@@ -30,25 +52,19 @@ def redirects_twilio_request_to_proper_endpoint(request):
     active_cookie_val = request.session.get(active_cookie)
 
     if not active_cookie or active_cookie == 'choose_survey':
-        return redirect('choose_survey')
+        return redirect('textin:choose_survey')
     elif active_cookie == 'responder_id':
         responder = Responder.objects.get(id=int(active_cookie_val))
-        return redirect('set_responder_attr', responder_id=responder.id)
+        return redirect('textin:set_responder_attr', responder_id=responder.id)
     elif active_cookie == 'answering_question_id':
         if not active_cookie_val:
             first_survey = Survey.objects.first()
-            return redirect('survey', survey_id=first_survey.id)
+            return redirect('textin:survey', survey_id=first_survey.id)
         else:
             question = Question.objects.get(id=active_cookie_val)
-            return redirect('save_response',
+            return redirect('textin:save_response',
                             survey_id=question.survey.id,
                             question_id=question.id)
-
-
-@require_GET
-def redirect_to_first_results(request):
-    first_survey = Survey.objects.first()
-    return redirect('survey_results', survey_id=first_survey.id)
 
 
 @csrf_exempt
@@ -65,7 +81,7 @@ def choose_survey(request):
             return HttpResponse(compose_response(SurveyStrings.no_surveys))
         elif len(surveys) == 1:
             first_survey = surveys.first()
-            return redirect('survey', survey_id=first_survey.id)
+            return redirect('textin:survey', survey_id=first_survey.id)
 
         return HttpResponse(compose_response(
             SurveyStrings.choose_survey + "\n\n" + SurveyStrings.survey_options(surveys)))
@@ -86,7 +102,7 @@ def choose_survey(request):
         del request.session['choose_survey']
 
         survey = surveys[survey_num - 1]
-        return redirect('survey', survey_id=survey.id)
+        return redirect('textin:survey', survey_id=survey.id)
 
 
 @csrf_exempt
@@ -109,10 +125,11 @@ def show_survey(request, survey_id):
         'survey_id': survey.id,
         'question_id': first_question.id
     }
-    first_question_url = reverse('question', kwargs=first_question_ids)
+    first_question_url = reverse('textin:question', kwargs=first_question_ids)
 
     if new_responder:  # If this is a new Responder
-        new_responder_url = reverse('process_responder', kwargs={'responder_id': responder.id})
+        responder_params = {'responder_id': responder.id}
+        new_responder_url = reverse('textin:process_responder', kwargs=responder_params)
         twiml_response = MessagingResponse()
         twiml_response.redirect(new_responder_url, method='GET')
     else:

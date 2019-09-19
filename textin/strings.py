@@ -16,6 +16,12 @@ response:"
 class ResponderStrings():
     skip_instr = "We'd appreciate it if you'd tell us a little bit about yourself.\n\nTo skip any \
 of the following questions, please respond with SKIP."
+    name_attr_display = "first and last name"
+    email_attr_display = "email"
+
+    @staticmethod
+    def get_responder_attr(attr):
+        return f"What is your {getattr(ResponderStrings, f'{attr}_attr_display')}?"
 
 
 class SurveyStrings():

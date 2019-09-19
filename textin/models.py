@@ -15,7 +15,7 @@ class Survey(models.Model):
 
     @property
     def responder_count(self):
-        return len(Responder.objects.filter(surveys__responder_set__contains=self.id))
+        return Responder.objects.filter(surveys__in=[Survey.objects.get(id=self.id)]).count()
 
     @property
     def first_question(self):
@@ -56,7 +56,7 @@ class Question(models.Model):
 
 class Responder(models.Model):
     USER_SET_ATTRS = ['name', 'email']
-    
+
     phone_number = models.CharField(max_length=255, unique=True)
     name = models.CharField(max_length=255, blank=True, null=True)
     email = models.CharField(max_length=255, blank=True, null=True)

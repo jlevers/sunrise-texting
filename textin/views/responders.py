@@ -26,7 +26,7 @@ def process_responder(request, responder_id):
 def set_responder_attr(request, responder_id):
     if request.method == 'GET':
         attr = request.session['responder_attr']
-        return HttpResponse(compose_response("What is your %s?" % attr))
+        return HttpResponse(compose_response(ResponderStrings.get_responder_attr(attr)))
     elif request.method == 'POST':
         responder = Responder.objects.get(id=responder_id)
         attr = request.session['responder_attr']
