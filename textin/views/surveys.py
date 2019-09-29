@@ -4,20 +4,14 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
-from django.views.generic.edit import UpdateView
+from django.views.generic.edit import CreateView, UpdateView
 from django.views.generic.list import ListView
 from twilio.twiml.messaging_response import MessagingResponse
 
+from textin.forms import QuestionFormSet, SurveyForm
 from textin.models import Question, Responder, Survey
 from textin.strings import SurveyStrings
 from textin.util import compose_response
-
-
-@require_GET
-def show_surveys(request):
-    surveys = Survey.objects.all().order_by('-start_date')
-    context = {'surveys': surveys}
-    return render(request, 'textin/surveys.html', context)
 
 
 class SurveyListView(ListView):
@@ -25,10 +19,41 @@ class SurveyListView(ListView):
     context_object_name = 'surveys'
 
 
-class SurveyUpdate(UpdateView):
+class CreateUpdateSurveyMixin:
+    def post(self, request, *args, **kwargs):
+        question_formset = QuestionFormSet(request.POST)
+
+        if question_formset.is_valid():
+            question_formset.save()
+
+        return super().post(request, *args, **kwargs)
+
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        questions = Question.objects.filter(survey=self.object)
+        question_formset = QuestionFormSet(queryset=questions)
+        context['question_formset'] = question_formset
+        context['verb'] = self.verb
+        return context
+
+
+class SurveyCreateView(CreateUpdateSurveyMixin, CreateView):
     model = Survey
     fields = '__all__'
-    template_name_suffix = '_update_form'
+    template_name_suffix = '_form'
+    verb = 'Create'
+
+    def get_success_url(self):
+        return reverse('textin:app_root')
+
+
+class SurveyUpdateView(CreateUpdateSurveyMixin, UpdateView):
+    model = Survey
+    fields = '__all__'
+    template_name_suffix = '_form'
+    verb = 'Update'
 
     def get_success_url(self):
         return reverse('textin:survey_update', kwargs={'pk': self.object.id})

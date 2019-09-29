@@ -6,12 +6,13 @@ from textin.views.question_responses import save_response
 from textin.views.responders import process_responder, set_responder_attr
 from textin.views.surveys import choose_survey, show_survey, show_survey_results
 from textin.views.surveys import redirects_twilio_request_to_proper_endpoint
-from textin.views.surveys import SurveyListView, SurveyUpdate
+from textin.views.surveys import SurveyCreateView, SurveyListView, SurveyUpdateView
 
 app_name = 'textin'
 urlpatterns = [
     path('', SurveyListView.as_view(), name='app_root'),
-    path('survey/<int:pk>/edit', SurveyUpdate.as_view(), name='survey_update'),
+    path('survey/new/', SurveyCreateView.as_view(), name='survey_new'),
+    path('survey/<int:pk>/edit/', SurveyUpdateView.as_view(), name='survey_update'),
     path('choose-survey/', choose_survey, name='choose_survey'),
     path('survey/<int:survey_id>/', show_survey, name='survey'),
     path('survey/<int:survey_id>/results/', show_survey_results, name='survey_results'),
@@ -20,6 +21,6 @@ urlpatterns = [
     path('survey/<int:survey_id>/question/<int:question_id>/question-response/',
          csrf_exempt(save_response),
          name='save_response'),
-    path('responder/<int:responder_id>', csrf_exempt(process_responder), name='process_responder'),
+    path('responder/<int:responder_id>/', csrf_exempt(process_responder), name='process_responder'),
     path('responder/<int:responder_id>/set-attr/', set_responder_attr, name='set_responder_attr')
 ]

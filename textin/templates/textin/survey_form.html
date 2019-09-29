@@ -1,0 +1,23 @@
+{% extends 'base_template.html' %}
+
+{% block content %}
+
+{% load crispy_forms_tags %}
+
+<form action="" method="post">
+  {% csrf_token %}
+  {{ form|crispy }}
+
+  {{ question_formset.management_form|crispy }}
+  {% for question_form in question_formset %}
+    <h3>Question {{ forloop.counter }}</h3>
+    {% csrf_token %}
+    {{ question_form|crispy }}
+  {% endfor %}
+
+  <div class="form-group">
+    <input type="submit" class="btn btn-primary" value="{{ verb }}">
+  </div>
+</form>
+
+{% endblock %}
