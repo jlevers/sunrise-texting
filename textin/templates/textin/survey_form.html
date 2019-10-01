@@ -2,22 +2,34 @@
 
 {% block content %}
 
+{% load static %}
 {% load crispy_forms_tags %}
 
-<form action="" method="post">
+<form id="survey-form" action="" method="post">
   {% csrf_token %}
+  {{ form.errors }}
   {{ form|crispy }}
 
   {{ question_formset.management_form|crispy }}
   {% for question_form in question_formset %}
-    <h3>Question {{ forloop.counter }}</h3>
-    {% csrf_token %}
-    {{ question_form|crispy }}
+    <div class="question-formset-form">
+      <h3 class="question-header">Question {{ forloop.counter }}</h3>
+      {{ question_form.errors }}
+      {{ question_form|crispy }}
+    </div>
   {% endfor %}
+
+  <button type="button" class="btn btn-secondary" id="add-question">Add Question</button>
+  <br/>
+  <br/>
 
   <div class="form-group">
     <input type="submit" class="btn btn-primary" value="{{ verb }}">
   </div>
 </form>
 
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'textin/js/survey_form.js' %}"></script>
 {% endblock %}

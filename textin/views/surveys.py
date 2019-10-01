@@ -4,7 +4,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
-from django.views.generic.edit import CreateView, UpdateView
+from django.views.generic.edit import CreateView, FormView, UpdateView
 from django.views.generic.list import ListView
 from twilio.twiml.messaging_response import MessagingResponse
 
@@ -19,15 +19,35 @@ class SurveyListView(ListView):
     context_object_name = 'surveys'
 
 
-class CreateUpdateSurveyMixin:
+class CreateUpdateSurveyMixin(FormView):
+    model = Survey
+    fields = '__all__'
+    template_name = 'textin/survey_form.html'
+
     def post(self, request, *args, **kwargs):
+        above = super().post(request, *args, **kwargs)
         question_formset = QuestionFormSet(request.POST)
-
         if question_formset.is_valid():
-            question_formset.save()
+            for form in question_formset:
+                question = form.save(commit=False)
+                question.survey = self.object
+                question.save()
+            return above
+        else:
+            return render(request, self.template_name,
+                           context={'form': SurveyForm(request.POST), 'question_formset': question_formset, 'verb': self.verb})
+        # instances = question_formset.save(commit=False)
+        # for instance in instances:
+        #     instance.survey_id = self.object.id
+        #     if instance.is_valid():
+        #         instance.save()
 
-        return super().post(request, *args, **kwargs)
-
+        return above
+        #
+        # if instances.is_valid():
+        #     print('valid')
+        #     for question_form in question_formset:
+        #         question_form.save()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -35,14 +55,11 @@ class CreateUpdateSurveyMixin:
         questions = Question.objects.filter(survey=self.object)
         question_formset = QuestionFormSet(queryset=questions)
         context['question_formset'] = question_formset
-        context['verb'] = self.verb
+        context['verb'] = self.verb if self.verb else 'Update'
         return context
 
 
 class SurveyCreateView(CreateUpdateSurveyMixin, CreateView):
-    model = Survey
-    fields = '__all__'
-    template_name_suffix = '_form'
     verb = 'Create'
 
     def get_success_url(self):
@@ -50,9 +67,6 @@ class SurveyCreateView(CreateUpdateSurveyMixin, CreateView):
 
 
 class SurveyUpdateView(CreateUpdateSurveyMixin, UpdateView):
-    model = Survey
-    fields = '__all__'
-    template_name_suffix = '_form'
     verb = 'Update'
 
     def get_success_url(self):

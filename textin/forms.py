@@ -6,7 +6,7 @@ from textin.models import Question, Survey
 class QuestionForm(ModelForm):
     class Meta:
         model = Question
-        fields = ['body', 'kind']
+        exclude = ['survey']
 
 QuestionFormSet = modelformset_factory(Question, form=QuestionForm, extra=0)
 
