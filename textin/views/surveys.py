@@ -27,27 +27,21 @@ class CreateUpdateSurveyMixin(FormView):
     def post(self, request, *args, **kwargs):
         above = super().post(request, *args, **kwargs)
         question_formset = QuestionFormSet(request.POST)
+
         if question_formset.is_valid():
             for form in question_formset:
-                question = form.save(commit=False)
-                question.survey = self.object
-                question.save()
+                if form.cleaned_data != {}:
+                    question = form.save(commit=False)
+                    question.survey = self.object
+                    question.save()
             return above
         else:
-            return render(request, self.template_name,
-                           context={'form': SurveyForm(request.POST), 'question_formset': question_formset, 'verb': self.verb})
-        # instances = question_formset.save(commit=False)
-        # for instance in instances:
-        #     instance.survey_id = self.object.id
-        #     if instance.is_valid():
-        #         instance.save()
-
-        return above
-        #
-        # if instances.is_valid():
-        #     print('valid')
-        #     for question_form in question_formset:
-        #         question_form.save()
+            context = {
+                'form': SurveyForm(request.POST),
+                'question_formset': question_formset,
+                'verb': self.verb
+            }
+            return render(request, self.template_name, context)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -64,7 +58,6 @@ class SurveyCreateView(CreateUpdateSurveyMixin, CreateView):
 
     def get_success_url(self):
         return reverse('textin:app_root')
-
 
 class SurveyUpdateView(CreateUpdateSurveyMixin, UpdateView):
     verb = 'Update'

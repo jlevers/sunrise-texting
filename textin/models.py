@@ -3,7 +3,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 
 class Survey(models.Model):
-    title = models.CharField(max_length=255, unique=True)
+    title = models.CharField(max_length=255)
     end_message = models.CharField(max_length=500,
                                    default="That was the last question. Thank you for taking this survey!")
     start_date = models.DateField(default=date.today)

@@ -19,6 +19,8 @@
     </div>
   {% endfor %}
 
+  <br />
+  <br />
   <button type="button" class="btn btn-secondary" id="add-question">Add Question</button>
   <br/>
   <br/>
@@ -27,6 +29,10 @@
     <input type="submit" class="btn btn-primary" value="{{ verb }}">
   </div>
 </form>
+
+<div id="form-template" style="display: none;">
+    <!-- Will be filled with an empty form to use as a template when adding additional Question forms -->
+</div>
 
 {% endblock %}
 

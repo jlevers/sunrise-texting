@@ -1,25 +1,43 @@
 $(document).ready(function() {
+  const questionFormClass = '.question-formset-form';
+  let numForms = parseInt($('#id_form-TOTAL_FORMS').val());
+  let lastForm = loadLastForm(questionFormClass);
+
+  removeHiddenIdField(lastForm);  // Remove the hidden ID input field from the extra (last) form
+  // Remove `questionFormClass` so that $(questionFormClass) doesn't select `copyForm`
+  const hidden = $(lastForm).clone().removeClass(questionFormClass.substring(1));
+  $('#form-template').html(hidden);
+  const copyForm = $('#form-template').contents(); // Template form to copy later
+
   $('#add-question').click(function() {
-    const formset = $('.question-formset-form');
-    const lastForm = $(formset[formset.length - 1]);
-    const cloned = lastForm.clone();
-    updateAttrs(cloned);
-    lastForm.after(cloned);
+    const cloned = $(copyForm).clone()
+      .css('display', 'block')
+      .addClass(questionFormClass.substring(1))
+      .attr('id', 'clone');
+
+    updateAttrs($(cloned), numForms);
+    lastForm = loadLastForm(questionFormClass);
+    $(lastForm).after(cloned);
+    numForms++;
   });
 });
 
-const updateAttrs = element => {
-  const regex = /.*form-(\d)-.*/;
-  const totalFormsId = '#id_form-TOTAL_FORMS';
-  const numForms = parseInt($(totalFormsId).attr('value'));
-  $(totalFormsId).attr('value', numForms + 1);  // Increment management form's TOTAL_FORMS count
+const removeHiddenIdField = element => {
+  $(element).find('input[id^="id_form-"][id$="-id"]').remove();
+}
 
-  $(element).find('.question-header').text('Question ' + (numForms + 1));
+const loadLastForm = formClass => {
+  const forms = $(formClass);
+  return forms[forms.length - 1];
+}
+
+const updateAttrs = (element, numForms) => {
+  const regex = /.*form-(\d)-.*/;
+  $($(element).find('.question-header')).text('Question ' + (numForms + 1));
   $(element).find('input').not('[type="hidden"]').each(function() {  // Reset any visible inputs
     $(this).val(null);
   });
   $(element).find('select').prop('selectedIndex', -1);  // Reset select element(s)
-  $(element).find(`#id_form-${numForms - 1}-id`).remove(); // Remove hidden ID input, if it exists
   updateAttrsRecur(element, regex, numForms);
 }
 
@@ -30,11 +48,13 @@ const updateAttrsRecur = (element, regex, numForms) => {
     children.each((idx, el) => { updateAttrsRecur(el, regex, numForms); });
   }
 
-  const attrs = $(element)[0].attributes;
-  for (var i = 0; i < attrs.length; i++) {
-    const attr = attrs[i];
-    if (attr.nodeValue.match(regex)) {
-      $(element).attr(attr.nodeName, attr.nodeValue.replace(/-\d-/, `-${numForms}-`));
+  if (element.attributes) {
+    const attrs = element.attributes;
+    for (var i = 0; i < attrs.length; i++) {
+      const attr = attrs[i];
+      if (attr.nodeValue.match(regex)) {
+        $(element).attr(attr.nodeName, attr.nodeValue.replace(/-\d-/, `-${numForms}-`));
+      }
     }
   }
 }
