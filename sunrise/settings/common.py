@@ -26,6 +26,7 @@ SECRET_KEY = env('SECRET_KEY')
 
 INSTALLED_APPS = [
     'crispy_forms',
+    'octicons',
     'textin',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -123,3 +124,45 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 # Makes django-crispy-forms use Bootstrap 4 (Alpha)
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+
+# Twilio account details
+TWILIO_ACCOUNT_SID = env('TWILIO_ACCOUNT_SID')
+TWILIO_AUTH_TOKEN = env('TWILIO_AUTH_TOKEN')
+TWILIO_NOTIFY_SERVICE_SID = env('TWILIO_NOTIFY_SERVICE_SID')
+
+
+# Logging
+LOGGING_ROOT = os.path.join(BASE_DIR, 'logs/')
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler'
+        },
+        'django_file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOGGING_ROOT, 'django.log')
+        },
+        'textin_file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOGGING_ROOT, 'textin.log')
+        }
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'django_file'],
+            'level': 'INFO',
+            'propagate': True
+        },
+        'textin': {
+            'handlers': ['console', 'textin_file'],
+            'level': 'DEBUG',
+            'propagate': True
+        }
+    }
+}

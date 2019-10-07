@@ -1,18 +1,22 @@
-{% extends "base_template.html" %}
+{% extends "textin/textin_base_template.html" %}
+
+{% load octicons %}
+{% load static %}
 
 {% block content %}
 
-<h1>Surveys</h1>
+<h1>Surveys<a href="{% url 'textin:survey_new' %}" id="new-survey">{% octicon "plus" %}</a></h1>
 
 {% if surveys|length < 1 %}
   <p>It appears that there are no surveys yet!</p>
 {% else %}
-  <table class="table table-hover">
+  <table id="survey-list" class="table table-hover">
     <thead>
       <th>Title</th>
       <th># of responses</th>
       <th>Start date</th>
       <th>End date</th>
+      <th>Send survey</th>
     </thead>
     {% for survey in surveys %}
     <tr>
@@ -20,9 +24,38 @@
       <td>{{ survey.responder_count }}</td>
       <td>{{ survey.start_date }}</td>
       <td>{{ survey.end_date }}</td>
+      <td>
+        {% csrf_token %}
+        <form class="push-survey-form">
+          {% if survey.followup and not survey.pushed %}
+            <button class="push-survey btn btn-secondary" type="submit" data-survey-id="{{ survey.id }}">
+              Send
+          {% else %}
+            <button class="push-survey push-survey-disabled btn btn-secondary" disabled>
+            {% if survey.followup %}
+              Sent <span class="pushed">{% octicon "check" %}</span>
+            {% else %}
+              User-triggered
+            {% endif %}
+          {% endif %}
+            </button>
+        </form>
+
+      </td>
     </tr>
     {% endfor %}
   </table>
 {% endif %}
 
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Constants we want to be able to access from other Javascript files, that are better defined using
+// Django template tags
+const PUSH_SURVEY_URL = `{% url 'textin:push_survey' %}`;
+const PUSH_SUCCESS_ICON = `{% octicon 'check' %}`;
+const PUSH_FAILURE_ICON = `{% octicon 'alert' %}`;
+</script>
+<script src="{% static 'textin/js/survey_list.js' %}"></script>
 {% endblock %}

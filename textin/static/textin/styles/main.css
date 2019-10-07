@@ -3,11 +3,17 @@ body {
   margin-right: 10%;
 }
 
-span.voice-response-text, i.play-icon {
-  line-height: 30px;
+.octicon {
+  display: inline-block;
+  vertical-align: text-top;
+  fill: currentColor;
 }
 
-i.play-icon {
-  vertical-align: middle;
-  cursor: pointer;
+#new-survey {
+  float: right;
+}
+
+#new-survey svg {
+  width: 25px;
+  height: auto;
 }

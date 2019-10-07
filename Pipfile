@@ -16,6 +16,7 @@ pytest-django = "*"
 django-crispy-forms = "*"
 psycopg2-binary = "*"
 gunicorn = "*"
+django-octicons = "*"
 
 [requires]
 python_version = "3.7"

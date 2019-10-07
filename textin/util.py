@@ -1,6 +1,8 @@
 import json
+from twilio.rest import Client
 from twilio.twiml.messaging_response import MessagingResponse
 
+from sunrise.settings.common import TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN
 from textin.models import Survey, Question
 
 class SurveyLoader():
@@ -13,6 +15,15 @@ class SurveyLoader():
                             end_message=self.survey['end_message'],
                             start_date=self.survey['start_date'],
                             end_date=self.survey['end_date'])
+
+        optional_survey_attrs = [
+            'start_message', 'end_message', 'followup', 'complete_responder',
+            'pushed', 'hidden'
+        ]
+        for attr in optional_survey_attrs:
+            if hasattr(self.survey, attr):
+                setattr(new_survey, attr, self.survey[attr])
+
         new_survey.save()
 
         questions = [Question(body=question['body'],
@@ -28,3 +39,7 @@ def compose_response(message):
         twiml_response.message(message)
 
     return twiml_response
+
+
+def get_twilio_client():
+    return Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)

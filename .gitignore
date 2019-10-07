@@ -4,3 +4,4 @@
 __pycache__
 /static
 /sunrise/static
+/logs/*.log

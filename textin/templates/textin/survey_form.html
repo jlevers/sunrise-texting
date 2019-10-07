@@ -1,4 +1,4 @@
-{% extends 'base_template.html' %}
+{% extends 'textin/textin_base_template.html' %}
 
 {% block content %}
 
@@ -7,14 +7,12 @@
 
 <form id="survey-form" action="" method="post">
   {% csrf_token %}
-  {{ form.errors }}
   {{ form|crispy }}
 
   {{ question_formset.management_form|crispy }}
   {% for question_form in question_formset %}
     <div class="question-formset-form">
       <h3 class="question-header">Question {{ forloop.counter }}</h3>
-      {{ question_form.errors }}
       {{ question_form|crispy }}
     </div>
   {% endfor %}

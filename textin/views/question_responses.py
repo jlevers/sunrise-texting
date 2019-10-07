@@ -42,7 +42,9 @@ def next_question_redirect(question_id, survey_id):
 
 def goodbye(request, question):
     goodbye_message = question.survey.end_message
-    return HttpResponse(compose_response(goodbye_message))
+    if goodbye_message:
+        return HttpResponse(compose_response(goodbye_message))
+    return HttpResponse(status=204)
 
 
 def save_response_from_request(request, question):

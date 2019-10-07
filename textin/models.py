@@ -2,12 +2,19 @@ from datetime import date
 from django.db import models
 from django.core.exceptions import ValidationError
 
+from textin.strings import SurveyStrings
+
 class Survey(models.Model):
     title = models.CharField(max_length=255)
-    end_message = models.CharField(max_length=500,
+    start_message = models.CharField(max_length=500, blank=True, null=True)
+    end_message = models.CharField(max_length=500, blank=True, null=True,
                                    default="That was the last question. Thank you for taking this survey!")
     start_date = models.DateField(default=date.today)
     end_date = models.DateField()
+    followup = models.ForeignKey('self', on_delete=models.PROTECT, blank=True, null=True, default=None)
+    complete_responder = models.BooleanField(default=False)
+    pushed = models.BooleanField(default=False)
+    hidden = models.BooleanField(default=False)
 
     @property
     def responses(self):
@@ -21,8 +28,12 @@ class Survey(models.Model):
     def first_question(self):
         return Question.objects.filter(survey__id=self.id).order_by('id').first()
 
+    @property
+    def first_message(self):
+        return self.start_message if self.start_message else SurveyStrings.welcome(self.title)
+
     def __str__(self):
-        return '%s' % self.title
+        return '<Survey: %s>' % self.title
 
 
 class Question(models.Model):
@@ -55,18 +66,19 @@ class Question(models.Model):
 
 
 class Responder(models.Model):
+    # If this is changed, the data migration 0012_auto_20191007_0432 needs to be updated, and the
+    # corresponding surveys/questions in the database need to be updated
     USER_SET_ATTRS = ['name', 'email']
 
     phone_number = models.CharField(max_length=255, unique=True)
     name = models.CharField(max_length=255, blank=True, null=True)
     email = models.CharField(max_length=255, blank=True, null=True)
     surveys = models.ManyToManyField(to=Survey)
+    survey_queue = models.ManyToManyField(to=Survey)
+    active_question = models.ForeignKey(Question, on_delete=models.PROTECT, blank=True, null=True)
 
     def __str__(self):
-        stringified = "<%s" % self.phone_number
-        stringified = ("%s\nphone: " % self.name if self.name is not None else "") + stringified
-        stringified += ("\nemail: %s" % self.email if self.email is not None else "")
-        return stringified + ">"
+        return "<Responder phone: %s>" % (self.id, self.phone_number)
 
 
 class QuestionResponse(models.Model):
@@ -76,7 +88,7 @@ class QuestionResponse(models.Model):
     responder = models.ForeignKey(Responder, on_delete=models.CASCADE)
 
     def __str__(self):
-        return '%s' % self.response
+        return '<QuestionResponse: %s>' % self.response
 
     def as_dict(self):
         return {

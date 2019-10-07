@@ -14,8 +14,14 @@ response:"
 
 
 class ResponderStrings():
-    skip_instr = "We'd appreciate it if you'd tell us a little bit about yourself.\n\nTo skip any \
-of the following questions, please respond with SKIP."
+    new_responder_details_title = "Responder details (INTERNAL)"
+    update_responder_details_title = "Responder details update (INTERNAL)"
+    skip_instr = "To skip any of the following questions, please respond with SKIP."
+    new_details_or_skip_instr = "We'd appreciate it if you'd tell us a little bit about yourself.\
+\n\n" + skip_instr
+    existing_details_or_skip_instr = "We're missing some of your contact information. We'd really\
+appreciate it if you'd be willing to answer a question or two that would help us best reach you in\
+the future.\n\n" + skip_instr
     name_attr_display = "first and last name"
     email_attr_display = "email"
 

@@ -1,9 +1,9 @@
-from django.forms import ModelForm, modelformset_factory
+from django import forms
 
 from textin.models import Question, Survey
 
 
-class QuestionForm(ModelForm):
+class QuestionForm(forms.ModelForm):
     def is_valid(self):
         rest_is_valid = super().is_valid()
         if self.cleaned_data != {} and \
@@ -16,10 +16,17 @@ class QuestionForm(ModelForm):
         model = Question
         exclude = ['survey']
 
-QuestionFormSet = modelformset_factory(Question, form=QuestionForm, extra=1)
+QuestionFormSet = forms.modelformset_factory(Question, form=QuestionForm, extra=1)
 
 
-class SurveyForm(ModelForm):
+class DateInput(forms.DateInput):
+    input_type = 'date'
+
+class SurveyForm(forms.ModelForm):
     class Meta:
         model = Survey
         fields = '__all__'
+        widgets = {
+            'start_date': DateInput(),
+            'end_date': DateInput()
+        }
