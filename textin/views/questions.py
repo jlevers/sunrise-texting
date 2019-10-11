@@ -16,11 +16,11 @@ def show_question(request, survey_id, question_id):
     return HttpResponse(twiml, content_type='application/xml')
 
 
-def sms_question(question):
-    return compose_response(question.body + ' ' + SMS_INSTRUCTIONS[question.kind])
-
 SMS_INSTRUCTIONS = {
     Question.TEXT: QuestionStrings.TEXT,
     Question.YES_NO: QuestionStrings.YES_NO,
     Question.NUMERIC: QuestionStrings.NUMERIC
 }
+def sms_question(question):
+    instructions = SMS_INSTRUCTIONS[question.kind]
+    return compose_response(question.body + ('\n\n' + instructions if instructions else ''))

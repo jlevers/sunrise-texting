@@ -13,6 +13,7 @@ class Survey(models.Model):
     end_date = models.DateField()
     followup = models.ForeignKey('self', on_delete=models.PROTECT, blank=True, null=True, default=None)
     complete_responder = models.BooleanField(default=False)
+    pushable = models.BooleanField(default=False)
     pushed = models.BooleanField(default=False)
     hidden = models.BooleanField(default=False)
 
@@ -74,11 +75,14 @@ class Responder(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True)
     email = models.CharField(max_length=255, blank=True, null=True)
     surveys = models.ManyToManyField(to=Survey)
-    survey_queue = models.ManyToManyField(to=Survey)
-    active_question = models.ForeignKey(Question, on_delete=models.PROTECT, blank=True, null=True)
+    active_survey = models.ForeignKey(Survey, on_delete=models.PROTECT, blank=True, null=True,
+                                      related_name='active_survey')
+
+    def complete(self):
+        return self.phone_number and self.name and self.email
 
     def __str__(self):
-        return "<Responder phone: %s>" % (self.id, self.phone_number)
+        return "<Responder #%s  phone: %s>" % (self.id, self.phone_number)
 
 
 class QuestionResponse(models.Model):

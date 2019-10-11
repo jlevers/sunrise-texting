@@ -10,9 +10,9 @@ from textin.util import compose_response
 @require_POST
 def save_response(request, survey_id, question_id):
     question = Question.objects.get(id=question_id)
-
+    responder = Responder.objects.get(phone_number=request.POST['From'])
     # If they haven't yet answered this question
-    if not already_answered(request.POST['From'], question.id):
+    if not already_answered(responder.id, question.id):
 
         # Process invalid answers
         valid = save_response_from_request(request, question)
@@ -24,6 +24,8 @@ def save_response(request, survey_id, question_id):
 
         next_question = question.next()
         if not next_question:
+            responder.active_survey = None
+            responder.save()
             return goodbye(request, question)
         else:
             return next_question_redirect(next_question.id, survey_id)
@@ -42,6 +44,7 @@ def next_question_redirect(question_id, survey_id):
 
 def goodbye(request, question):
     goodbye_message = question.survey.end_message
+    del request.session['answering_question_id']
     if goodbye_message:
         return HttpResponse(compose_response(goodbye_message))
     return HttpResponse(status=204)
@@ -61,9 +64,9 @@ def save_response_from_request(request, question):
     return True
 
 
-def already_answered(phone_number, question_id):
-    return len(QuestionResponse.objects.filter(question_id=question_id,
-                                               responder__phone_number=phone_number))
+def already_answered(responder_id, question_id):
+    return len(QuestionResponse.objects.filter(question__id=question_id,
+                                               responder__id=responder_id))
 
 
 def _extract_request_body(request, question_kind):

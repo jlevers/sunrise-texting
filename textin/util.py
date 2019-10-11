@@ -41,5 +41,14 @@ def compose_response(message):
     return twiml_response
 
 
+def create_get_param_string(obj):
+    get_param_string = ''
+    if len(obj) > 0:
+        get_param_string = '?'
+        for key, val in obj.items():
+            get_param_string += f'{key}={str(val)}&'
+    return get_param_string
+
+
 def get_twilio_client():
     return Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)

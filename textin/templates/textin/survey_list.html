@@ -33,7 +33,7 @@
           {% else %}
             <button class="push-survey push-survey-disabled btn btn-secondary" disabled>
             {% if survey.followup %}
-              Sent <span class="pushed">{% octicon "check" %}</span>
+              Sent <span class="pushed">&nbsp;&nbsp;{% octicon "check" %}</span>
             {% else %}
               User-triggered
             {% endif %}
@@ -53,7 +53,7 @@
 <script>
 // Constants we want to be able to access from other Javascript files, that are better defined using
 // Django template tags
-const PUSH_SURVEY_URL = `{% url 'textin:push_survey' %}`;
+const PUSH_SURVEY_TEMPLATE_URL = `{% url 'textin:push_survey' 1 %}`
 const PUSH_SUCCESS_ICON = `{% octicon 'check' %}`;
 const PUSH_FAILURE_ICON = `{% octicon 'alert' %}`;
 </script>

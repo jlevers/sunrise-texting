@@ -23,7 +23,7 @@ urlpatterns = [
     path('survey/new/', SurveyCreateView.as_view(), name='survey_new'),
     path('survey/<int:pk>/', show_survey, name='survey'),
     path('survey/<int:pk>/edit/', SurveyUpdateView.as_view(), name='survey_update'),
-    path('survey/push/', push_survey, name='push_survey'),
+    path('survey/<int:pk>/push/', push_survey, name='push_survey'),
     path('survey/<int:pk>/results/', show_survey_results, name='survey_results'),
 
     # Question paths
